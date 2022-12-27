@@ -1,0 +1,62 @@
+---
+title: "R Notebook"
+output:
+  html_document: default
+  git_documents: default
+---
+
+```{r}
+# see working directory
+getwd()
+```
+
+```{r}
+# set path to the location for raw data files in the dslabs package and list files
+path <- system.file("extdata", package="dslabs")
+list.files(path)
+```
+
+```{r}
+# generate a full path to a file
+filename <- "murders.csv"
+fullpath <- file.path(path, filename)
+fullpath
+```
+
+```{r}
+# copy file from dslabs package to your working directory
+file.copy(fullpath, getwd())
+
+# check if the file exists
+file.exists(filename)
+```
+
+```{r}
+# loading libraries
+library(tidyverse)
+library(readr)
+```
+
+## Reading `murders.csv` using TidyVerse library
+To read the file successfully we will first have peak at a file to check its format.
+```{r}
+# reading first few lines
+read_lines("murders.csv", n_max=3)
+```
+
+Looking at the output we know it is a comma-separated file. Hence we will use the `read_csv` function
+
+```{r}
+data_murders <- read_csv("murders.csv")
+head(data_murders)
+```
+
+## Reading `murders.csv` using base function
+
+```{r}
+data_murders2 <- read.csv("murders.csv")
+class(data_murders2)
+```
+
+TidyVerse library fuctions creates a tibble and base fuctions creates a dataframe.
+

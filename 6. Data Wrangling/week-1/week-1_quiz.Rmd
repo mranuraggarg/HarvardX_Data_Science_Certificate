@@ -1,0 +1,37 @@
+---
+title: "Quiz Week 1"
+output:
+  html_document:
+    df_print: paged
+---
+
+## load Libraries
+```{r, echo=FALSE}
+library(readr)
+library(readxl)
+```
+
+Q14 Inspect the file at the following URL:
+`https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data`
+
+Which readr function should be used to import this file?
+
+```{r}
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data"
+```
+
+### Step 1
+Download the file to inspect its format
+
+```{r, echo=FALSE}
+download.file(url, "wdbc.data")
+read_lines("wdbc.data", n_max=3)
+```
+
+looking at the data it is a csv file
+
+```{r}
+wdbc_dat <- read_csv("wdbc.data", col_names=FALSE)
+head(wdbc_dat)
+```
+
