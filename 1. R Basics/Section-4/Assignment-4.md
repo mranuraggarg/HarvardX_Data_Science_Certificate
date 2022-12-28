@@ -1,0 +1,84 @@
+Assignment-4
+================
+Anurag Garg
+2022-12-28
+
+## Question 1
+
+Load the heights dataset from dslabs:
+
+``` r
+library(dslabs)
+data(heights)
+```
+
+Write an ifelse() statement that returns 1 if the sex is Female and 2 if
+the sex is Male.
+
+``` r
+print(sum(ifelse(heights$sex == 'Female', 1, 2)))
+```
+
+    ## [1] 1862
+
+## Question 2
+
+Write an ifelse() statement that takes the height column and returns the
+height if it is greater than 72 inches and returns 0 otherwise. What is
+the mean of the resulting vector?
+
+``` r
+print(mean(ifelse(heights$height > 72, heights$height, 0)))
+```
+
+    ## [1] 9.653534
+
+## Question 3
+
+Write a function inches_to_ft that takes a number of inches x and
+returns the number of feet. One foot equals 12 inches.
+
+What is inches_to_ft(144)?
+
+``` r
+inches_to_ft <- function(inch){
+  inch / 12
+}
+```
+
+How many individuals in the heights dataset have a height less than 5
+feet?
+
+``` r
+print(sum(ifelse(inches_to_ft(heights$height) < 5, 1, 0)))
+```
+
+    ## [1] 20
+
+## Question 4
+
+Which of the following are TRUE? Done directly on assignment page
+
+## Question 5
+
+Given an integer x, the factorial of x is called x! and is the product
+of all integers up to and including x. The factorial() function computes
+factorials in R. For example, factorial(4) returns 4! = 4 × 3 × 2 × 1 =
+24.
+
+``` r
+# define a vector of length m
+m <- 10
+f_n <- vector(length = m)
+
+# make a vector of factorials
+for(n in 1:10){
+  f_n[n] <- factorial(n)
+}
+
+# inspect f_n
+f_n
+```
+
+    ##  [1]       1       2       6      24     120     720    5040   40320  362880
+    ## [10] 3628800
