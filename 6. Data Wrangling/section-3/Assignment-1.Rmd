@@ -1,0 +1,51 @@
+---
+title: "Assignment-1"
+author: "Anurag Garg"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading library
+```{r, echo=FALSE}
+library(tidyverse)
+```
+
+## Question 4
+
+You have a data frame of monthly sales and profits in R: 
+
+```
+> head(dat)
+# A tibble: 5 x 3
+Month     Sales     Profit 
+<chr>     <chr>     <chr>  
+January   $128,568  $16,234
+February  $109,523  $12,876
+March     $115,468  $17,920
+April     $122,274  $15,825
+May       $117,921  $15,437
+    
+```
+
+Data is stored in `question4_31.csv`
+
+```{r}
+dat <- read_csv('question4_31.csv', col_names = TRUE)
+head(dat)
+```
+
+Which of the following commands could convert the sales and profits columns to numeric? Select all that apply.
+
+```{r}
+dat %>% mutate_at(2:3, parse_number)
+```
+
+```{r}
+dat %>% mutate_at(2:3, funs(str_replace_all(., c("\\$|,"), ""))) %>% 
+    mutate_at(2:3, as.numeric)
+```
+
