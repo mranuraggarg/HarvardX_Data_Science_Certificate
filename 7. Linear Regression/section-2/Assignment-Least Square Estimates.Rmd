@@ -1,5 +1,5 @@
 ---
-title: 'Assignment: Least Square Estimates'
+title: 'Assignment: Least Square Estimates Part 1'
 author: "Anurag Garg"
 date: '`r Sys.Date()`'
 output: github_document
