@@ -1,0 +1,137 @@
+---
+title: 'Assessment: Stratification and Variance'
+author: "Anurag Garg"
+date: '`r Sys.Date()`'
+output: github_document
+---
+
+In the second part of this assessment, you'll analyze a set of mother and daughter heights, also from GaltonFamilies.
+
+Define female_heights, a set of mother and daughter heights sampled from GaltonFamilies, as follows:
+
+```{r}
+set.seed(1989) #if you are using R 3.5 or earlier
+set.seed(1989, sample.kind="Rounding") #if you are using R 3.6 or later
+library(HistData)
+library(tidyverse)
+data("GaltonFamilies")
+
+female_heights <- GaltonFamilies%>%     
+    filter(gender == "female") %>%     
+    group_by(family) %>%     
+    sample_n(1) %>%     
+    ungroup() %>%     
+    select(mother, childHeight) %>%     
+    rename(daughter = childHeight)
+```
+
+## Question 8
+
+Calculate the mean and standard deviation of mothers' heights, the mean and standard deviation of daughters' heights, and the correlaton coefficient between mother and daughter heights.
+### Question 8.1
+Mean of mothers' heights
+
+```{r}
+mu_m <- female_heights %>%
+    select(mother) %>%
+    summarise(mom_mean = mean(mother)) %>%
+    pull(mom_mean)
+mu_m
+```
+
+
+### Question 8.2
+Standard deviation of mothers' heights
+
+```{r}
+sigma_m <- female_heights %>%
+    summarise(mom_std = sd(mother)) %>%
+    pull(mom_std)
+sigma_m
+```
+
+
+### Question 8.3
+Mean of daughters' heights
+
+```{r}
+mu_d <- female_heights %>%
+    summarise(daughter_mean = mean(daughter)) %>%
+    pull(daughter_mean)
+mu_d
+```
+
+
+### Question 8.4
+Standard deviation of daughters' heights
+
+```{r}
+sigma_d <- female_heights %>%
+    summarise(daughter_std = sd(daughter)) %>%
+    pull(daughter_std)
+sigma_d
+```
+
+
+### Question 8.5
+Correlation coefficient
+
+```{r}
+corr <- female_heights %>%
+    summarise(corr = cor(mother, daughter)) %>%
+    pull(corr)
+corr
+```
+
+## Question 9
+
+Calculate the slope and intercept of the regression line predicting daughters' heights given mothers' heights. Given an increase in mother's height by 1 inch, how many inches is the daughter's height expected to change?
+
+### Question 9.1
+Slope of regression line predicting daughters' height from mothers' heights
+
+```{r}
+m_d <- corr * sigma_d / sigma_m
+m_d
+```
+
+### Question 9.2
+Intercept of regression line predicting daughters' height from mothers' heights
+
+```{r}
+b_d <- mu_d - m_d * mu_m
+b_d
+```
+
+### Question 9.3
+Change in daughter's height in inches given a 1 inch increase in the mother's height
+
+```{r}
+m_d <- corr * sigma_d / sigma_m
+m_d
+```
+
+### Question 9.4
+You have used 0 of 10 attempts Some problems have options such as save, reset, hints, or show answer. These options follow the Submit button.
+
+## Question 10
+
+What percent of the variability in daughter heights is explained by the mother's height?
+
+```{r}
+corr^2 * 100
+```
+
+
+## Question 11
+
+A mother has a height of 60 inches.
+
+Using the regression formula, what is the conditional expected value of her daughter's height given the mother's height?
+
+```{r}
+height_m <- 60
+hight_d <- b_d + m_d * height_m
+hight_d
+```
+
