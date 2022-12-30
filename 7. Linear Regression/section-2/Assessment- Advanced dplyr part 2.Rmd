@@ -1,0 +1,87 @@
+---
+title: 'Assessment: Advanced dplyr, part 2'
+author: "Anurag Garg"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We have investigated the relationship between fathers' heights and sons' heights. But what about other parent-child relationships? Does one parent's height have a stronger association with child height? How does the child's gender affect this relationship in heights? Are any differences that we observe statistically significant?
+
+The galton dataset is a sample of one male and one female child from each family in the GaltonFamilies dataset. The pair column denotes whether the pair is father and daughter, father and son, mother and daughter, or mother and son.
+
+Create the galton dataset using the code below:
+
+```{r}
+library(tidyverse)
+library(broom)
+library(HistData)
+data("GaltonFamilies")
+# set.seed(1) # if you are using R 3.5 or earlier
+set.seed(1, sample.kind = "Rounding") # if you are using R 3.6 or later
+galton <- GaltonFamilies %>%
+    group_by(family, gender) %>%
+    sample_n(1) %>%
+    ungroup() %>% 
+    gather(parent, parentHeight, father:mother) %>%
+    mutate(child = ifelse(gender == "female", "daughter", "son")) %>%
+    unite(pair, c("parent", "child"))
+
+head(galton)
+```
+
+## Question 8
+
+Group by pair and summarize the number of observations in each group.
+How many father-daughter pairs are in the dataset?
+
+```{r}
+galton %>%
+    group_by(pair) %>%
+    summarise(count = length(parentHeight)) %>%
+    filter(pair == "father_daughter") %>%
+    pull(count)
+```
+
+
+How many mother-son pairs are in the dataset?
+
+```{r}
+galton %>%
+    group_by(pair) %>%
+    summarise(count = length(parentHeight)) %>%
+    filter(pair == "mother_son") %>%
+    pull(count)
+```
+
+
+## Question 9
+0.0/2.0 points (graded)
+
+Calculate the correlation coefficients for fathers and daughters, fathers and sons, mothers and daughters and mothers and sons. For every 1-inch increase in mother's height, how many inches does the typical son's height increase?
+
+```{r}
+galton %>%
+    select(pair, childHeight, parentHeight) %>%
+    group_by(pair) %>%
+    summarise(corr = cor(childHeight, parentHeight))
+```
+
+
+Question 10 has two parts. The information here applies to both parts.
+
+Use lm() and the broom package to fit regression lines for each parent-child pair type. Compute the least squares estimates, standard errors, confidence intervals and p-values for the parentHeight coefficient for each pair.
+
+## Question 10a
+What is the estimate of the father-daughter coefficient?
+
+```{r}
+galton %>%
+    group_by(pair) %>%
+    summarise(tidy(lm(childHeight ~ parentHeight), conf.int = TRUE))
+```
+
+

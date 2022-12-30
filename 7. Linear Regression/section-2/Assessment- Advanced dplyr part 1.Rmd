@@ -1,0 +1,67 @@
+---
+title: 'Assessment: Advanced dplyr, part 1'
+author: "Anurag Garg"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 5
+
+You want to take the tibble dat, which we used in the video on the advanced dplyr, and run the linear model R ~ BB for each strata of HR. Then you want to add three new columns to your grouped tibble: the coefficient, standard error, and p-value for the BB term in the model.
+
+You’ve already written the function get_slope(), shown below.
+
+```{r}
+library(tidyverse)
+get_slope <- function(data) {
+  fit <- lm(R ~ BB, data = data)
+  sum.fit <- summary(fit)
+
+  data.frame(slope = sum.fit$coefficients[2, "Estimate"], 
+             se = sum.fit$coefficients[2, "Std. Error"],
+             pvalue = sum.fit$coefficients[2, "Pr(>|t|)"])
+}
+
+# Reminder dat is defined as
+library(Lahman)
+dat <- Teams %>% filter(yearID %in% 1961:2001) %>%
+  mutate(HR = round(HR/G, 1), 
+         BB = BB/G,
+         R = R/G) %>%
+  select(HR, BB, R) %>%
+  filter(HR >= 0.4 & HR<=1.2)
+```
+
+What additional code could you write to accomplish your goal?
+
+```{r}
+dat %>% 
+  group_by(HR) %>% 
+  summarize(get_slope(across()))
+```
+
+## Question 7
+
+You want to know whether the relationship between home runs and runs per game varies by baseball league. You create the following dataset:
+
+```{r}
+dat <- Teams %>% filter(yearID %in% 1961:2001) %>%
+  mutate(HR = HR/G,
+         R = R/G) %>%
+  select(lgID, HR, BB, R)
+```
+
+What code would help you quickly answer this question?
+
+```{r}
+library(broom)
+dat %>% 
+  group_by(lgID) %>% 
+  summarize(tidy(lm(R ~ HR, data = across()), conf.int = T)) %>% 
+  filter(term == "HR") 
+```
+
