@@ -1,0 +1,113 @@
+---
+title: 'Assessment: Confounding'
+author: "Anurag Garg"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+## Introduction
+
+For this set of exercises, we examine the data from a 2014 PNAS paper that analyzed success rates from funding agencies in the Netherlands External link and concluded:
+
+"our results reveal gender bias favoring male applicants over female applicants in the prioritization of their "quality of researcher" (but not "quality of proposal") evaluations and success rates, as well as in the language used in instructional and evaluation materials."
+
+A response was published a few months later titled No evidence that gender contributes to personal research funding success in The Netherlands: A reaction to Van der Lee and Ellemers External link, which concluded:
+
+However, the overall gender effect borders on statistical significance, despite the large sample. Moreover, their conclusion could be a prime example of Simpson’s paradox; if a higher percentage of women apply for grants in more competitive scientific disciplines (i.e., with low application success rates for both men and women), then an analysis across all disciplines could incorrectly show "evidence" of gender inequality. 
+
+Who is right here: the original paper or the response? Here, you will examine the data and come to your own conclusion.
+
+The main evidence for the conclusion of the original paper comes down to a comparison of the percentages. The information we need was originally in Table S1 in the paper, which we include in dslabs:
+
+```{r}
+library(tidyverse)
+library(dslabs)
+data("research_funding_rates")
+research_funding_rates
+```
+
+## Q1
+Construct a two-by-two table of gender (men/women) by award status (awarded/not) using the total numbers across all disciplines.
+
+What is the number of men not awarded?
+
+```{r}
+research_funding_rates %>%
+    summarise(men_total = sum(applications_men),
+              men_awarded = sum(awards_men),
+              men_not_awarded = sum(applications_men) - sum(awards_men),
+              women_total = sum(applications_women),
+              women_awarded = sum(awards_women),
+              women_not_awarded = sum(applications_women) - sum(awards_women)
+              )
+```
+
+## Q2
+Use the two-by-two table from Question 1 to compute the percentages of men awarded versus women awarded.
+
+What is the percentage of men awarded?
+Report a percentage between 0 and 100 including 1 decimal place. Do NOT include the percent symbol (%).
+
+```{r}
+research_funding_rates %>%
+    summarise(men_award_percent = sum(awards_men) * 100 / sum(applications_men),
+              women_award_percent = sum(awards_women) * 100 / sum(applications_women)
+    )
+```
+
+## Q3
+Run a chi-squared test External link on the two-by-two table to determine whether the difference in the two funding awarded rates is significant. (You can use tidy() to turn the output of chisq.test() into a data frame as well.)
+
+What is the p-value of the difference in funding awarded rate?
+
+```{r}
+summary_table <- research_funding_rates %>%
+    summarise(awarded_men = sum(awards_men),
+              not_awarded_men = sum(applications_men) - sum(awards_men),
+              awarded_women = sum(awards_women),
+              not_awarded_women = sum(applications_women) - sum(awards_women)
+              )
+two_by_two <- data.frame(awarded = c("no", "yes"), 
+                         men = c(summary_table$not_awarded_men, summary_table$awarded_men),
+                         women = c(summary_table$not_awarded_women, summary_table$awarded_women))
+chisq_test <- two_by_two |> select(-awarded) |> chisq.test()
+chisq_test
+```
+
+## Q4
+There may be an association between gender and funding. But can we infer causation here? Is gender bias causing this observed difference? The response to the original paper claims that what we see here is similar to the UC Berkeley admissions example. Specifically they state that this "could be a prime example of Simpson’s paradox; if a higher percentage of women apply for grants in more competitive scientific disciplines, then an analysis across all disciplines could incorrectly show 'evidence' of gender inequality."
+
+To settle this dispute, use this dataset with number of applications, awards, and success rate for each gender:
+
+```{r}
+dat <- research_funding_rates %>% 
+      mutate(discipline = reorder(discipline, success_rates_total)) %>%
+      rename(success_total = success_rates_total,
+             success_men = success_rates_men,
+             success_women = success_rates_women) %>%
+      pivot_longer(-discipline) %>%
+      separate(name, c("type", "gender")) %>%
+      pivot_wider(names_from = type, values_from = value) %>%
+      filter(gender != "total")
+dat
+```
+
+To check if this is a case of Simpson's paradox, plot the success rates versus disciplines, which have been ordered by overall success, with colors to denote the genders and size to denote the number of applications.
+
+In which fields do men have a higher success rate than women?
+```{r}
+dat %>% 
+    ggplot(aes(discipline, success, col = gender, size = applications)) +
+    geom_point() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+```{r}
+dat %>%
+    group_by(discipline) %>%
+    summarise(total=sum(applications), success=sum(success)) %>%
+    ggplot(aes(x=discipline, y=success)) +
+    geom_bar(stat="identity") +
+    theme(axis.text.x = element_text(angle = 60, vjust = 0.5, hjust=1))
+```
+
